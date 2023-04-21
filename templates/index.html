@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+      <script src="{{ url_for('static',filename='code.js') }}"></script>
+      <link rel="stylesheet" href="{{ url_for('static',filename='styles/sheet.css') }}">
+      <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
+</head>
+<body>
+  <div class="image-container">
+    <img src="../static/images/vchlogo.png" alt="Image description">
+  </div>
+  <div class="login-card">
+    <h2>VR Examination Portal</h2>
+    <div>
+      <input id="username" placeholder=" " type="text" required>
+      <label for="username">Username</label>
+    </div>
+    <div>
+      <input id="password" placeholder=" " type="password" required>
+      <label for="password">Password</label>
+    </div>
+    <button onclick = "readLogin()">Log In</button>
+    <label id="message"></label>
+  </div>
+</body>
+</html>
