@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+      <script src="{{ url_for('static',filename='code.js') }}"></script>
+      <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
+  </head>
+  <body onload="javascript:initializePatients()">
+    <label id="test">Press</label>
+    <div class="row">
+    <div class="centerColumn">
+        <div class="card" id="patientList">
+
+
+        </div>
+    </div>
+    </div>
+  </body>
+</html>
