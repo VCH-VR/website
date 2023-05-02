@@ -1,12 +1,28 @@
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, flash, request, session, redirect
+from flask_cors import CORS
 from sqlalchemy import create_engine, MetaData, Column, Table, Integer, String
+from werkzeug.utils import secure_filename
+from matplotlib import pyplot as plt;
+from pylab import genfromtxt;
 import json
+import os
 
 
 # Initializes app
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.secret_key = "Valley Children's :D"
+
+
+api_v1_cors_config = {
+  "origins": ["*"],
+  "methods": ["OPTIONS", "GET", "POST", "PASS"]
+}
+CORS(app, resources={"/*": api_v1_cors_config})
+
+UPLOAD_FOLDER = '/home/Undefined100/cse120/static/patientFiles/'
+ALLOWED_EXTENSIONS = {'txt', 'csv', 'json', 'png', 'jpg'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 # Initializes databases
@@ -36,20 +52,19 @@ loginData_meta.create_all(loginData_engine)
 # App responses to connections at various URLs
 
 # Initialization at starting the program
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
     # Sets the current user to be null, displays login page
-    session['username'] = "null"
-    session['patient'] = "null";
-    return render_template('index.html')
+    if request.method == 'GET':
+        session['username'] = "null"
+        session['patient'] = "null";
+        return render_template('index.html')
 
 
 
 
-@app.route('/patientdata', methods = ['UPLOAD','PULLLIST', 'PULL'])
+@app.route('/patientdata', methods = ['PULLLIST', 'PULL'])
 def patientDataFunction():
-    if (request.method == 'UPLOAD'):
-        return "User not found"
     if (request.method == 'PULLLIST'):
         # Probably add some kind of security for people just putting bs in
         patientData_connection = patientData_engine.connect()
@@ -75,15 +90,81 @@ def patientDataFunction():
         return "null"
 
 
-@app.route('/patients', methods = ['GET'])
+@app.route('/patients', methods = ['GET', 'POST'])
 def patientDisplayFunction():
-    if session.get('username') is not None:
-        if (session['username'] != "null"):
-             return render_template('patients.html')
+    if request.method == 'GET':
+        if session.get('username') is not None:
+            if (session['username'] != "null"):
+                return render_template('patients.html')
+            else:
+                return render_template('index.html')
         else:
             return render_template('index.html')
-    else:
-        return render_template('index.html')
+    if request.method == 'POST':
+        # check if the post request has the file part
+        print("Test")
+        if 'file' not in request.files:
+            print("Test1")
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            print("Test2")
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+
+            # Integrate the file ^^
+            # Names MUST be MMDDYYYYPATIENT_NAME.txt
+            filename = secure_filename(file.filename)
+            filename = str(filename)
+            birthday = filename[:8]
+            patientName = filename[8:-4]
+
+            # File is likely valid at this point, nothing bad will happen if the file makes it by here anyways - Enforce security later probably
+            if (birthday.isdigit()):
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                patientData_connection = patientData_engine.connect()
+
+                s = "SELECT birthday FROM patientData WHERE name='" + patientName + "'"
+                result = patientData_connection.execute(s)
+                result = str(result.fetchone())
+                if (str(birthday) == result[2:-3]):
+                    print("Updated Patient Data")
+                else:
+                    print(result)
+                    s = "INSERT INTO patientData (name, birthday) VALUES ('" + patientName + "', '" + birthday + "')"
+                    patientData_connection.execute(s)
+                patientData_connection.close()
+
+
+                # Make the numpy graph
+                plt.clf()
+                plt.rcParams["figure.figsize"] = [7.00, 3.50]
+                plt.rcParams["figure.autolayout"] = True
+
+                filedata = genfromtxt(os.path.join(app.config['UPLOAD_FOLDER'], filename));
+                leftEye = filedata[:, 0]
+                rightEye = filedata[:, 1]
+                leftEye = leftEye[leftEye != -1]
+                rightEye = rightEye[rightEye != -1]
+
+                plt.plot(leftEye, label="Left Eye");
+                plt.plot(rightEye, label="Right Eye");
+
+
+                plt.legend();
+                plt.title(patientName.replace("_", " ") + "'s Eye Chart")
+                plt.xlabel('Time')
+                plt.ylabel('Milimeters')
+
+                plt.savefig(os.path.join(app.config['UPLOAD_FOLDER'], filename[:-4] + ".png"))
+
+
+            return render_template('patients.html')
+        return "Bad File Type: {'txt', 'csv', 'json', 'png', 'jpg'} allowed"
 
 
 @app.route('/login', methods = ['PASS'])
@@ -105,7 +186,7 @@ def loginFunction():
         print(matchingPass)
         print(password)
         loginData_connection.close()
-
+        print("test")
 
 
         if (matchingPass == "None"):
@@ -123,16 +204,35 @@ def loginFunction():
         else:
             return "incorrect"
 
-@app.route('/display/<patientID>', methods = ['GET'])
-def displayFunction(patientID):
+@app.route('/display/<patient>', methods = ['GET'])
+def displaySetter(patient):
     if session.get('username') is not None:
         if (session['username'] != "null"):
-            session['patient'] = patientID;
+            session['patient'] = patient;
             return render_template('display.html')
         else:
             return render_template('index.html')
     else:
         return render_template('index.html')
+
+@app.route('/display', methods = ['PULL'])
+def displayGetter():
+    if session.get('username') is not None:
+        return session['patient']
+    else:
+        return ""
+
+
+# File Input Handling
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+
+
 
 # Start the app
 if __name__ == '__main__':
