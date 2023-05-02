@@ -6,7 +6,12 @@
       <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
   </head>
   <body onload="javascript:initializePatients()">
-    <label id="test">Press</label>
+    <h1>Select Patient</h1>
+    <h2>You may also upload your own data<h2>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
     <div class="row">
     <div class="centerColumn">
         <div class="card" id="patientList">
