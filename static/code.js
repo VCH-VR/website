@@ -22,13 +22,16 @@ async function checkLogin() {
     password = document.getElementById("password").value;
     // Hashes password
     password = hash(password);
+    console.log("test");
 
     // Calls the PASS function in /student as seen in index.py, assigns reply to variable data
     const response = await fetch('https://undefined100.pythonanywhere.com/login', {
         method: 'PASS',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            "Access-Control-Allow-Methods": "PASS"
         },
         body: JSON.stringify({username, password})});
     return await response.text();
@@ -64,8 +67,14 @@ async function fillPatients() {
         patientList = document.getElementById("patientList");
 
         for (let i = 1; i <= patientCount; i++) {
-            substring = value.substring(value.indexOf("{")+1, value.indexOf("}"));
-            patientList.innerHTML += "<button onclick='display(" + i.toString() + ")'>" + substring + "</button>";
+            substring = value.substring(value.indexOf("{")+2, value.indexOf("}")-1);
+            patientName = substring.substring(0, substring.indexOf("'"));
+            birthday = substring.substring(substring.indexOf("'")+4);
+            cleanPatientName = patientName.replace(/_/g, " ");
+            cleanBirthday = birthday.substring(0, 2) + "/" + birthday.substring(2, 4) + "/" + birthday.substring(4);
+
+
+            patientList.innerHTML += "<button onclick='display(" + '"' + birthday + patientName + '"' + ")'>" + cleanPatientName + ", " + cleanBirthday + "</button>";
             value = value.substring(value.indexOf("}")+1);
         }
     });
@@ -76,14 +85,17 @@ async function initializePatients() {
 }
 
 async function initializeDisplay() {
-    // insert call to display data here
+    const response = await fetch('https://undefined100.pythonanywhere.com/display', {method: 'PULL'});
+    var patient = await response.text();
+
+    document.getElementById("graph").src = "../static/patientFiles/" + patient + ".png";
 }
 
 
 
 
 
-async function display(patientID) {
-    const response = await fetch('https://undefined100.pythonanywhere.com/display/' + patientID, {method: 'GET'});
-    location.href = "display/" + patientID;
+async function display(patient) {
+    const response = await fetch('https://undefined100.pythonanywhere.com/display/' + patient, {method: 'GET'});
+    location.href = "display/" + patient;
 }
