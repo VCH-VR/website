@@ -3,15 +3,37 @@
 <html lang="en">
   <head>
       <script src="{{ url_for('static',filename='code.js') }}"></script>
+
+      <!-- <link rel="stylesheet" href="patient.css"> -->
+      <link rel="stylesheet" href="{{ url_for('static',filename='styles/patient.css') }}">
       <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
   </head>
+
+        <header>
+        <div class="logo">
+            <img src="{{ url_for('static',filename='images/vchlogo.png') }}" alt="VCH Logo">
+        </div>
+
+        <div class="title">
+            <h1>VR Examination Portal</h1>
+
+
+
+
+
+
+
+        </div>
+
+
+    </header>
+    <div class="container">
   <body onload="javascript:initializePatients()">
+
+
+
     <h1>Select Patient</h1>
-    <h2>You may also upload your own data<h2>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
+
     <div class="row">
     <div class="centerColumn">
         <div class="card" id="patientList">
@@ -19,6 +41,24 @@
 
         </div>
     </div>
-    </div>
+  </div>
+</div>
+
+<div class="container">
+    <h2>Upload your own data<h2>
+
+
+
+    <form method=post enctype=multipart/form-data>
+      <label class="drop-container">
+        <span class="drop-title">Drop files here</span>
+        or
+        <input type=file name=file>
+      </label>
+      <input type=submit value=Upload>
+    </form>
+
   </body>
+</div>
+
 </html>
