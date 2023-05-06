@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-
 <html lang="en">
   <head>
       <script src="{{ url_for('static',filename='code.js') }}"></script>
       <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
+      <link rel="stylesheet" href="{{ url_for('static',filename='styles/patient.css') }}">
   </head>
+
+  <header>
+    <div class="logo">
+        <img src="{{ url_for('static',filename='images/vchlogo.png') }}" alt="VCH Logo">
+    </div>
+
+    <div class="title">
+        <h1>VR Examination Portal</h1>
+    </div>
+
+</header>
+
+<div class="container">
+<div class="gracontainer">
   <body onload="javascript:initializeDisplay()">
+    <div class="graphsContainer">
     <img class="graph" id="graph"></img>
+    <img class="graph" id="graph2"></img>
+    </div>
   </body>
+</div>
+</div>
 </html>
