@@ -3,6 +3,7 @@ from flask_cors import CORS
 from sqlalchemy import create_engine, MetaData, Column, Table, Integer, String
 from werkzeug.utils import secure_filename
 from matplotlib import pyplot as plt;
+import numpy as np;
 from pylab import genfromtxt;
 import json
 import os
@@ -146,13 +147,21 @@ def patientDisplayFunction():
                 plt.rcParams["figure.autolayout"] = True
 
                 filedata = genfromtxt(os.path.join(app.config['UPLOAD_FOLDER'], filename));
+                averagedata = genfromtxt(os.path.join(app.config['UPLOAD_FOLDER'], "averageEyeDi.txt"));
                 leftEye = filedata[:, 0]
                 rightEye = filedata[:, 1]
+                eyeFOV = filedata[:, 2]
                 leftEye = leftEye[leftEye != -1]
                 rightEye = rightEye[rightEye != -1]
 
+                maxLeftLeftEye = eyeFOV[0]
+                maxRightLeftEye = eyeFOV[1]
+                maxLeftRightEye = eyeFOV[2]
+                maxRightRightEye = eyeFOV[3]
+
                 plt.plot(leftEye, label="Left Eye");
                 plt.plot(rightEye, label="Right Eye");
+                plt.plot(averagedata, label="Average");
 
 
                 plt.legend();
@@ -161,6 +170,21 @@ def patientDisplayFunction():
                 plt.ylabel('Milimeters')
 
                 plt.savefig(os.path.join(app.config['UPLOAD_FOLDER'], filename[:-4] + ".png"))
+
+                plt.clf()
+                plt.rcParams["figure.figsize"] = [7.00, 3.50]
+                plt.rcParams["figure.autolayout"] = True
+
+                objects = ('Goal', 'Left Eye Left', 'Left Eye Right', 'Right Eye Left', 'Right Eye Right')
+                y_pos = np.arange(len(objects))
+                performance = [40,maxLeftLeftEye,maxRightLeftEye,maxLeftRightEye,maxRightRightEye]
+
+                plt.bar(y_pos, performance, align='center', alpha=0.5, width =0.5, color=['purple', 'red', 'red', 'blue', 'blue'])
+                plt.xticks(y_pos, objects)
+                plt.ylabel('Angle')
+                plt.title('Eye Frame of View')
+
+                plt.savefig(os.path.join(app.config['UPLOAD_FOLDER'], filename[:-4] + "2.png"))
 
 
             return render_template('patients.html')
