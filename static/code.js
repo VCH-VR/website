@@ -72,9 +72,7 @@ async function fillPatients() {
             birthday = substring.substring(substring.indexOf("'")+4);
             cleanPatientName = patientName.replace(/_/g, " ");
             cleanBirthday = birthday.substring(0, 2) + "/" + birthday.substring(2, 4) + "/" + birthday.substring(4);
-
-
-            patientList.innerHTML += "<button onclick='display(" + '"' + birthday + patientName + '"' + ")'>" + cleanPatientName + ", " + cleanBirthday + "</button>";
+            patientList.innerHTML += "<div><button onclick='display(" + '"' + birthday + patientName + '"' + ")'>" + cleanPatientName + ", " + cleanBirthday + "</button></div>";
             value = value.substring(value.indexOf("}")+1);
         }
     });
@@ -89,6 +87,7 @@ async function initializeDisplay() {
     var patient = await response.text();
 
     document.getElementById("graph").src = "../static/patientFiles/" + patient + ".png";
+    document.getElementById("graph2").src = "../static/patientFiles/" + patient + "2.png";
 }
 
 
@@ -99,3 +98,7 @@ async function display(patient) {
     const response = await fetch('https://undefined100.pythonanywhere.com/display/' + patient, {method: 'GET'});
     location.href = "display/" + patient;
 }
+
+
+
+
